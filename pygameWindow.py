@@ -1,11 +1,12 @@
 import pygame
 import random
+import constants
 #constants.width 
 
 class PYGAME_WINDOW:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((1000,500))
+        self.screen = pygame.display.set_mode((constants.windowWidth,constants.windowDepth))
         
     def Prepare(self):
         self.screen.fill((255,255,255))
