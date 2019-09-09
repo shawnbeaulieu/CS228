@@ -1,2 +1,3 @@
-windowWidth = 1000
-windowDepth = 500
+windowWidth = 750
+windowDepth = 750
+MaxBoneWidth = 10

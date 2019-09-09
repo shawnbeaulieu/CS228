@@ -1,7 +1,6 @@
 import pygame
 import random
 import constants
-#constants.width 
 
 class PYGAME_WINDOW:
     def __init__(self):
@@ -29,3 +28,7 @@ class PYGAME_WINDOW:
             y += 1
             
         return(x,y)
+        
+    def Draw_Black_Line(self, base_x, base_y, tip_x, tip_y, bone_type):
+        bone_width = constants.MaxBoneWidth - 2*(bone_type+1)
+        pygame.draw.line(self.screen, (0,0,0), (base_x, base_y), (tip_x, tip_y), bone_width)
