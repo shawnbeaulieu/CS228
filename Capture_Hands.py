@@ -5,6 +5,8 @@ import Leap
 import pygame
 import constants
 
+import numpy as np
+
 from pygameWindow_Del03 import PYGAME_WINDOW
 
 class Capture_Hands:
@@ -18,7 +20,12 @@ class Capture_Hands:
         self.yMin = 10000.0
         self.yMax = -10000.0
                 
-        self.numberOfHands = 0
+        self.previousNumberOfHands = 0
+        self.currentNumberOfHands = 0
+        self.Recording = False
+        self.waiting2record = False
+        
+        self.gestureData = np.zeros((5,4,6), dtype='float32')
                 
     def Scale(self, var_to_scale, r1, r2, r3, r4):
  
@@ -36,25 +43,39 @@ class Capture_Hands:
 
         hand = frame.hands[0]
         fingers = hand.fingers
-        for finger in fingers:
-            self.Handle_Finger(finger)
-
-    def Handle_Finger(self, finger):
+        
+        self.Recording_Is_Ending()
+        
+        for f in range(len(fingers)):
+            self.Handle_Finger(fingers[f], f)
+        
+        if self.waiting2record == False and self.Recording == True:
+            print(self.gestureData)
+        
+    def Handle_Finger(self, finger, f_index):
 
         for bone_type in range(4):
-            bone = self.Handle_Bone(finger, bone_type)
+            bone = self.Handle_Bone(finger, bone_type, f_index)
 
-    def Handle_Bone(self, finger, bone_type):
+    def Handle_Bone(self, finger, bone_type, f_index):
 
         bone = finger.bone(bone_type)
     
         base = bone.prev_joint
-        base_x, base_y = self.Handle_Vector_From_Leap(base)
+        base_x, base_y, base_z, b_x, b_y, b_z = self.Handle_Vector_From_Leap(base)
     
         tip = bone.next_joint
-        tip_x, tip_y = self.Handle_Vector_From_Leap(tip)
+        tip_x, tip_y, tip_z, t_x, t_y, t_z = self.Handle_Vector_From_Leap(tip)
+        
+        if self.waiting2record == False and self.Recording == True:
+            self.gestureData[f_index, bone_type, :] = [b_x, b_y, b_z, t_x, t_y, t_z]
+        
+        if self.currentNumberOfHands == 1:
+            color = 'green'
+        elif self.currentNumberOfHands == 2:
+            color = 'red'
     
-        self.pyWindow.Draw_Black_Line(base_x, base_y, tip_x, tip_y, bone_type)
+        self.pyWindow.Draw_Line(base_x, base_y, tip_x, tip_y, bone_type, color)
         
         return(bone)
 
@@ -62,6 +83,7 @@ class Capture_Hands:
 
         self.x = int(vector[0]*-1.0) 
         self.y = int(vector[2])
+        self.z = int(vector[1])
     
         if self.x < self.xMin:
             self.xMin = self.x
@@ -72,11 +94,24 @@ class Capture_Hands:
         if self.y > self.yMax:
             self.yMax = self.y
 
+        unscaled_x = self.x
+        unscaled_y = self.y
+        unscaled_z = self.z
+        
         self.x = self.Scale(self.x, self.xMax, self.xMin, 0, constants.windowWidth)
         self.y = self.Scale(self.y, self.yMax, self.yMin, constants.windowWidth, 0)    
     
-        return(self.x,self.y)
+        return(self.x, self.y, self.z, unscaled_x, unscaled_y, unscaled_z)
 
+    def Recording_Is_Ending(self):
+    
+        if self.currentNumberOfHands == 1 and self.previousNumberOfHands == 2:
+            self.waiting2record = False
+            self.Recording = True
+        else:
+            self.waiting2record = True
+            self.Recording = False
+ 
     def Run_Forever(self):
     
         running = True
@@ -85,14 +120,21 @@ class Capture_Hands:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    
             pygame.event.get()
             self.pyWindow.Prepare()
             frame = self.controller.frame()
             handlist = frame.hands
+            
             if (len(handlist) > 0):
-                self.numberOfHands = len(handlist)
+                self.previousNumberOfHands = self.currentNumberOfHands
+                self.currentNumberOfHands = len(handlist)
                 self.Handle_Frame(frame)
-
+                
+            else:
+                self.previousNumberOfHands = self.currentNumberOfHands
+                self.currentNumberOfHands = 0
+                
             self.pyWindow.Reveal()
     
         pygame.quit()

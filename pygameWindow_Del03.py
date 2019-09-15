@@ -13,7 +13,7 @@ class PYGAME_WINDOW:
     def Reveal(self):
         pygame.display.update()
     
-    def Draw_Black_Circle(self, x, y, size):
+    def Draw_Circle(self, x, y, size):
         pygame.draw.circle(self.screen, (0,0,0), (x,y), size)
         
     def Perturb_Circle_Position(self, x, y):
@@ -29,6 +29,12 @@ class PYGAME_WINDOW:
             
         return(x,y)
         
-    def Draw_Black_Line(self, base_x, base_y, tip_x, tip_y, bone_type):
+    def Draw_Line(self, base_x, base_y, tip_x, tip_y, bone_type, color):
+    
+        if color == 'green':
+            hand_color = (60, 179, 113)
+        else:
+            hand_color = (255, 99, 71)
+            
         bone_width = constants.MaxBoneWidth - 2*(bone_type+1)
-        pygame.draw.line(self.screen, (0,0,0), (base_x, base_y), (tip_x, tip_y), bone_width)
+        pygame.draw.line(self.screen, hand_color, (base_x, base_y), (tip_x, tip_y), bone_width)
