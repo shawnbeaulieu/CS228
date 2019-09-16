@@ -7,11 +7,13 @@ Deliverable 3: Drawing skeletons of hands with pyGame and LeapMotion
 """
 
 import os
+import shutil
 
 from Capture_Hands import Capture_Hands
 
 def make_directory(pathway):
     try:
+        shutil.rmtree(pathway)
         os.makedirs(pathway)
     except OSError:
         if not os.path.isdir(pathway):

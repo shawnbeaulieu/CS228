@@ -12,6 +12,4 @@ import pickle
 from Reader import READER
 
 DataReader = READER()
-
-data = DataReader.Load_Data('userData/gesture.p')
-print(data)
+DataReader.Load_Data('userData')
