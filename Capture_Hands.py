@@ -2,12 +2,18 @@ import sys
 sys.path.insert(0, '..')
 
 import Leap
+import pickle
 import pygame
 import constants
 
 import numpy as np
 
 from pygameWindow_Del03 import PYGAME_WINDOW
+
+def Pickler(data, filename):
+    p = pickle.Pickler(open("{0}.p".format(filename), 'wb'))
+    p.fast = True
+    p.dump(data)
 
 class Capture_Hands:
     def __init__(self):
@@ -24,6 +30,8 @@ class Capture_Hands:
         self.currentNumberOfHands = 0
         self.Recording = False
         self.waiting2record = False
+        
+        self.record_counter = 0
         
         self.gestureData = np.zeros((5,4,6), dtype='float32')
                 
@@ -50,6 +58,8 @@ class Capture_Hands:
             self.Handle_Finger(fingers[f], f)
         
         if self.waiting2record == False and self.Recording == True:
+            
+            self.Save_Gesture()
             print(self.gestureData)
         
     def Handle_Finger(self, finger, f_index):
@@ -111,6 +121,10 @@ class Capture_Hands:
         else:
             self.waiting2record = True
             self.Recording = False
+    
+    def Save_Gesture(self):
+        Pickler(self.gestureData, "userData/gesture{0}".format(self.record_counter))
+        self.record_counter += 1
  
     def Run_Forever(self):
     
